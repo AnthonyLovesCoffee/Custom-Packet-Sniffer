@@ -1,0 +1,36 @@
+<!-- app/templates/dashboard.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard">
+    <h1>Network Traffic Analysis</h1>
+    
+    <div class="stats-container">
+        <div class="stat-box">
+            <h2>Total Packets</h2>
+            <div id="packetCount">0</div>
+        </div>
+        
+        <div class="stat-box">
+            <h2>Duration</h2>
+            <div id="duration">0s</div>
+        </div>
+    </div>
+
+    <div class="charts-container">
+        <div class="chart-box">
+            <h2>Protocol Distribution</h2>
+            <canvas id="protocolChart"></canvas>
+        </div>
+        
+        <div class="chart-box">
+            <h2>Top Connections</h2>
+            <div id="connectionsList"></div>
+        </div>
+    </div>
+
+    <div class="alerts-container">
+        <h2>Suspicious Activity</h2>
+        <div id="alertsList"></div>
+    </div>
+</div>
+{% endblock %}

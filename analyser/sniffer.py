@@ -82,7 +82,6 @@ class NetworkAnalyzer:
                 self.connections.items(), 
                 key=lambda x: x[1], 
                 reverse=True)[:10]),
-            'suspicious_events': len(self.suspicious_activity)
         }
         
         with open('network_stats.json', 'w') as f:
@@ -99,8 +98,19 @@ class NetworkAnalyzer:
                 datetime.now(),
                 self.packet_count,
                 len(self.protocols),
-                len(self.suspicious_activity)
             ])
+
+    def get_current_stats(self):
+        """Returns current statistics for the web interface"""
+        return {
+            'duration': time.time() - self.start_time,
+            'total_packets': self.packet_count,
+            'protocols': dict(self.protocols),
+            'top_connections': dict(sorted(
+                self.connections.items(), 
+                key=lambda x: x[1], 
+                reverse=True)[:10]),
+        }
 
 def main():
     parser = argparse.ArgumentParser(description='Advanced Network Traffic Analyzer')
