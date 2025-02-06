@@ -1,0 +1,6 @@
+flask==3.0.0
+scapy==2.5.0
+Werkzeug==3.0.1
+matplotlib==3.7.1
+python-dateutil==2.8.2
+Flask-WTF==1.2.1
