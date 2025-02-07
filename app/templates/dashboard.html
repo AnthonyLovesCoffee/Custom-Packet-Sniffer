@@ -1,36 +1,53 @@
-<!-- app/templates/dashboard.html -->
 {% extends "base.html" %}
+
 {% block content %}
-<div class="dashboard">
-    <h1>Network Traffic Analysis</h1>
-    
-    <div class="stats-container">
-        <div class="stat-box">
-            <h2>Total Packets</h2>
-            <div id="packetCount">0</div>
+<div class="dashboard-container">
+    <!-- Summary Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Duration</h3>
+            <p id="duration">0s</p>
         </div>
-        
-        <div class="stat-box">
-            <h2>Duration</h2>
-            <div id="duration">0s</div>
+        <div class="stat-card">
+            <h3>Total Packets</h3>
+            <p id="total-packets">0</p>
         </div>
     </div>
 
-    <div class="charts-container">
-        <div class="chart-box">
-            <h2>Protocol Distribution</h2>
-            <canvas id="protocolChart"></canvas>
+    <!-- Charts -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>Protocol Distribution</h3>
+            <div id="protocol-chart"></div>
         </div>
-        
-        <div class="chart-box">
-            <h2>Top Connections</h2>
-            <div id="connectionsList"></div>
+        <div class="chart-card">
+            <h3>Top Connections</h3>
+            <div id="connections-chart"></div>
         </div>
     </div>
 
-    <div class="alerts-container">
-        <h2>Suspicious Activity</h2>
-        <div id="alertsList"></div>
+    <!-- Packet Table -->
+    <div class="table-card">
+        <h3>Recent Packets</h3>
+        <div class="table-container">
+            <table id="packet-table">
+                <thead>
+                    <tr>
+                        <th>Source IP</th>
+                        <th>Destination IP</th>
+                        <th>Protocol</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table rows will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

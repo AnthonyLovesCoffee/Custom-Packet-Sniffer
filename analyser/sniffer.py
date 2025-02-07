@@ -1,14 +1,14 @@
 from scapy.all import *
 import time
 import json
-from collections import defaultdict
+from collections import defaultdict, deque
 import logging
 from datetime import datetime
 import argparse
 import csv
 
 class NetworkAnalyzer:
-    def __init__(self, output_file=None, verbose=False):
+    def __init__(self, output_file=None, verbose=False, max_packets=100):
         self.start_time = time.time()
         self.packet_count = 0
         self.protocols = defaultdict(int)
@@ -16,6 +16,7 @@ class NetworkAnalyzer:
         self.suspicious_activity = []
         self.output_file = output_file
         self.verbose = verbose
+        self.recent_packets = deque(maxlen=max_packets) 
         
         logging.basicConfig(
             level=logging.INFO,
@@ -25,20 +26,62 @@ class NetworkAnalyzer:
 
     # analyse individual packets
     def analyse_packets(self, packet):
-        self.packet_count += 1
-        
-        if packet.haslayer(Ether):
-            self._analyse_ethernet(packet)
+        try:
+            if self.verbose:
+                print("Received packet:", packet.summary())
+
+            # check IP or IPv6
+            if IP in packet:
+                ip_layer = packet[IP]
+            elif IPv6 in packet:
+                ip_layer = packet[IPv6]
+            else:
+                if self.verbose:
+                    print("Packet has no IP layer")
+                return
+
+            self.packet_count += 1
+            protocol = ip_layer.proto
             
-        if packet.haslayer(IP):
-            self._analyse_ip(packet)
-            
-        if packet.haslayer(TCP):
-            self._analyse_tcp(packet)
-        
-        # print statistics every 100 packets
-        if self.packet_count % 100 == 0:
-            self._generate_statistics()
+            if protocol in self.protocols:
+                self.protocols[protocol] += 1
+            else:
+                self.protocols[protocol] = 1
+
+            # getting port information
+            src_port = dst_port = None
+            if TCP in packet:
+                src_port = packet[TCP].sport
+                dst_port = packet[TCP].dport
+            elif UDP in packet:
+                src_port = packet[UDP].sport
+                dst_port = packet[UDP].dport
+
+            # create connection key
+            connection = f"{ip_layer.src}:{src_port} -> {ip_layer.dst}:{dst_port}"
+            if connection in self.connections:
+                self.connections[connection] += 1
+            else:
+                self.connections[connection] = 1
+
+            packet_info = {
+                'src_ip': ip_layer.src,
+                'dst_ip': ip_layer.dst,
+                'protocol': protocol,
+                'timestamp': time.time()
+            }
+            self.recent_packets.append(packet_info)
+
+            if self.verbose:
+                print(f"Processed packet - Source: {ip_layer.src}:{src_port}, "
+                      f"Dest: {ip_layer.dst}:{dst_port}, Protocol: {protocol}")
+
+        except Exception as e:
+            if self.verbose:
+                print(f"Error processing packet: {e}")
+
+    def get_recent_packets(self):
+        return list(self.recent_packets)
 
     # analyse ethernet layer
     def _analyse_ethernet(self, packet):
@@ -91,7 +134,6 @@ class NetworkAnalyzer:
             self._write_to_csv()
 
     def _write_to_csv(self):
-        """Writes packet information to CSV file"""
         with open(self.output_file, 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow([
@@ -100,8 +142,8 @@ class NetworkAnalyzer:
                 len(self.protocols),
             ])
 
+    # current statistics for API
     def get_current_stats(self):
-        """Returns current statistics for the web interface"""
         return {
             'duration': time.time() - self.start_time,
             'total_packets': self.packet_count,

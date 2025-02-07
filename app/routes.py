@@ -18,4 +18,6 @@ def dashboard():
 
 @app.route('/api/stats')
 def get_stats():
-    return jsonify(analyzer.get_current_stats())
+    stats = analyzer.get_current_stats()
+    stats['recent_packets'] = analyzer.get_recent_packets() 
+    return jsonify(stats)
