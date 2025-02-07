@@ -26,6 +26,7 @@ sudo python3 run.py
 
 ## Dashboard
 <img src="docs/img/dash.png" alt="dashboard" width=1500>
+
 ## Common Network Protocols
 
 [TCP, UDP, ICMP - frame breakdown](docs/PROTOCOLS.md)
